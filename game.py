@@ -195,7 +195,10 @@ class Player(sprite.Sprite):
                 i.rect.y = 800
                 for j in level_sprites:
                     if isinstance(j, Bullet):
-                        j.rect.y = 800
+                        if i.str == j.canon.str == 'bullet1':
+                            j.rect.y = 800
+                        elif i.str == j.canon.str == 'bullet2':
+                            j.rect.y = 800
             elif isinstance(i, Bullet):
                 i.rect.x = -70
 
@@ -253,6 +256,12 @@ class Bullet(sprite.Sprite):
 
     def update(self):
         self.rect.x += self.vel
+
+        collision = sprite.spritecollide(self, level_sprites, False)
+        for i in collision:
+            if isinstance(i, Platform):
+                self.rect.x = self.canon.rect.x - 70
+                break
         if abs(self.pl.rect.x - self.canon.rect.x) < 400:
             if self.rect.x < -480:
                 self.rect.x = self.canon.rect.x - 70
@@ -263,9 +272,10 @@ class Bullet(sprite.Sprite):
 
 #  Турель
 class Canon(sprite.Sprite):
-    def __init__(self):
+    def __init__(self, text):
         # Конструктор платформ
         super().__init__()
+        self.str = text
         # Также указываем фото платформы
         self.image = transform.scale(image.load('sprites/canon_pixian_ai.png'), (120, 90))
 
@@ -343,12 +353,12 @@ class Level_1(Level):
             level_sprites.add(block1)
 
         c_point = CheckPoint()
-        c_point.rect.x = 2000
+        c_point.rect.x = 2200
         c_point.rect.y = 500
         level_sprites.add(c_point)
 
         # В первом уровне мы не будем отображать турель со снарядом и поэтому скроем их за экран
-        canon = Canon()
+        canon = Canon("bullet1")
         canon.rect.x = 1300
         canon.rect.y = 1280
         level_sprites.add(canon)
@@ -357,6 +367,8 @@ class Level_1(Level):
         self.bullet.rect.x = 1230
         self.bullet.rect.y = 885
         level_sprites.add(self.bullet)
+
+        self.bullet2 = Bullet(canon, player)
 
 
 class Level_2(Level):
@@ -372,8 +384,10 @@ class Level_2(Level):
             [210, 32, 850, 360],
             [100, 32, 1200, 360],
             [100, 32, 1400, 360],
-            [100, 32, 1750, 427],
-            [100, 32, 2100, 518]
+            [100, 32, 1750, 410],
+            [100, 32, 2160, 525],
+            [100, 32, 2370, 525],
+            [100, 32, 2570, 525]
         ]
 
         level1 = [
@@ -394,19 +408,29 @@ class Level_2(Level):
             level_sprites.add(block1)
 
         c_point = CheckPoint()
-        c_point.rect.x = 2470
-        c_point.rect.y = 500
+        c_point.rect.x = 2670
+        c_point.rect.y = 425
         level_sprites.add(c_point)
 
-        canon = Canon()
+        canon = Canon("bullet1")
         canon.rect.x = 1500
         canon.rect.y = 280
         level_sprites.add(canon)
+
+        canon2 = Canon("bullet2")
+        canon2.rect.x = 2400
+        canon2.rect.y = 445
+        level_sprites.add(canon2)
 
         self.bullet = Bullet(canon, player)
         self.bullet.rect.x = 1430
         self.bullet.rect.y = 285
         level_sprites.add(self.bullet)
+
+        self.bullet2 = Bullet(canon2, player)
+        self.bullet2.rect.x = 2330
+        self.bullet2.rect.y = 445
+        level_sprites.add(self.bullet2)
 
 
 # Основная функция прогарммы
@@ -495,6 +519,7 @@ def main(level_num):
         # Рисуем объекты на окне
         current_level.draw(screen)
         current_level.bullet.update()
+        current_level.bullet2.update()
         player_sprite_list.draw(screen)
         player.hearts_sprite_list.draw(screen)
 
